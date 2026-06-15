@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  demo-api-mysql:
+    image: mysql:8.4
+    container_name: demo-api-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass123}
+      MYSQL_DATABASE: ${DB_NAME:-demo_api_db}
+      MYSQL_USER: ${DB_USER:-demo_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-demo_pass}
+    volumes:
+      - demo_api_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpass123}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - demo-api-network
+
+  demo-api-app:
+    build: .
+    container_name: demo-api-app
+    restart: unless-stopped
+    depends_on:
+      demo-api-mysql:
+        condition: service_healthy
+    environment:
+      PORT: 4000
+      DB_HOST: demo-api-mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-demo_user}
+      DB_PASSWORD: ${DB_PASSWORD:-demo_pass}
+      DB_NAME: ${DB_NAME:-demo_api_db}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    ports:
+      - "4000:4000"
+    networks:
+      - demo-api-network
+    deploy:
+      update_config:
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+volumes:
+  demo_api_mysql_data:
+
+networks:
+  demo-api-network:
+    driver: bridge

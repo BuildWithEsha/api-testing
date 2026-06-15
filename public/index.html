@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Keys</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #F7F6F3;
+      --surface:   #FFFFFF;
+      --border:    #E4E2DC;
+      --border-soft: #EDECEA;
+      --text:      #1C1E2B;
+      --text-2:    #6B6D7A;
+      --text-3:    #A8A9B2;
+      --accent:    #5A7A6A;
+      --accent-bg: #EEF3F0;
+      --accent-hov:#4A6858;
+      --danger:    #B85450;
+      --danger-bg: #FBF0EF;
+      --mono:      'DM Mono', monospace;
+      --sans:      'DM Sans', system-ui, sans-serif;
+      --radius:    10px;
+      --radius-sm: 6px;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ─────────────────────────────────────── */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 380px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 40px 36px 36px;
+    }
+
+    .login-wordmark {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 28px;
+    }
+
+    .login-heading {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .login-sub {
+      font-size: 14px;
+      color: var(--text-2);
+      margin-bottom: 32px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+      margin-bottom: 7px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 10px 13px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: var(--sans);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field-input:focus { border-color: var(--accent); background: var(--surface); }
+    .field-input::placeholder { color: var(--text-3); }
+
+    .login-field { margin-bottom: 20px; }
+
+    .btn-full {
+      width: 100%;
+      padding: 11px;
+      background: var(--text);
+      color: var(--surface);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-top: 4px;
+    }
+
+    .btn-full:hover { opacity: 0.85; }
+    .btn-full:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .login-error {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--danger);
+      display: none;
+    }
+
+    /* ── APP SHELL ──────────────────────────────────── */
+    #appShell { display: none; min-height: 100vh; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(247, 246, 243, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 0 32px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar-brand {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .topbar-nav {
+      display: flex;
+      gap: 2px;
+    }
+
+    .nav-tab {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--sans);
+      transition: all 0.12s;
+    }
+
+    .nav-tab:hover { color: var(--text); background: var(--border-soft); }
+    .nav-tab.active { color: var(--text); background: var(--border); }
+
+    .btn-signout {
+      font-size: 13px;
+      color: var(--text-3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--sans);
+      padding: 5px 0;
+      transition: color 0.12s;
+    }
+
+    .btn-signout:hover { color: var(--text-2); }
+
+    /* ── PAGE ───────────────────────────────────────── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .section-heading {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 16px;
+    }
+
+    /* ── CREATE FORM ────────────────────────────────── */
+    .create-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 12px;
+    }
+
+    .create-row {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .create-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-create {
+      padding: 9px 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-create:hover { background: var(--accent-hov); }
+    .btn-create:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── KEY REVEAL ─────────────────────────────────── */
+    .key-reveal {
+      background: var(--accent-bg);
+      border: 1px solid rgba(90, 122, 106, 0.2);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      animation: slideIn 0.22s ease-out;
+      display: none;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .key-reveal-label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .key-reveal-note {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-bottom: 14px;
+    }
+
+    .key-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+    }
+
+    .key-value {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .btn-copy {
+      flex-shrink: 0;
+      padding: 5px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--sans);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── STATS ──────────────────────────────────────── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .stat-cell {
+      background: var(--surface);
+      padding: 16px 20px;
+      text-align: center;
+    }
+
+    .stat-n {
+      font-size: 24px;
+      font-weight: 600;
+      font-family: var(--mono);
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-n.green { color: var(--accent); }
+
+    .stat-desc {
+      font-size: 12px;
+      color: var(--text-3);
+    }
+
+    /* ── KEYS TABLE ─────────────────────────────────── */
+    .keys-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .keys-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .keys-table thead {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .keys-table th {
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .keys-table td {
+      padding: 14px 16px;
+      vertical-align: middle;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .keys-table tr:first-child td { border-top: none; }
+
+    .key-name-cell .name { font-size: 14px; font-weight: 500; }
+    .key-name-cell .prefix {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    .perm-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-2);
+    }
+
+    .perm-tag.all {
+      background: var(--accent-bg);
+      border-color: rgba(90,122,106,0.2);
+      color: var(--accent);
+    }
+
+    .status-active, .status-revoked {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+    }
+
+    .status-active { color: var(--accent); }
+    .status-revoked { color: var(--text-3); }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-active .status-dot { background: var(--accent); }
+    .status-revoked .status-dot { background: var(--text-3); }
+
+    .meta { font-size: 13px; color: var(--text-3); }
+
+    .btn-revoke {
+      padding: 5px 11px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: var(--sans);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .btn-revoke:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    .btn-revoke:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── EMPTY / LOADING ────────────────────────────── */
+    .placeholder {
+      padding: 52px 20px;
+      text-align: center;
+    }
+
+    .placeholder-text { font-size: 14px; color: var(--text-3); }
+
+    /* ── DOCS PAGE ──────────────────────────────────── */
+    .doc-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .doc-block-head {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+    }
+
+    .doc-block-body { padding: 20px; }
+
+    .endpoint-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .endpoint-row:last-child { border-bottom: none; }
+
+    .method-badge {
+      flex-shrink: 0;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+
+    .ep-path {
+      font-family: var(--mono);
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .ep-perm {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    .ep-desc {
+      font-size: 13px;
+      color: var(--text-2);
+      min-width: 160px;
+    }
+
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text-2);
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.7;
+    }
+
+    /* ── UTILS ──────────────────────────────────────── */
+    .divider { height: 32px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-wordmark">Demo API</div>
+    <div class="login-heading">API Key Manager</div>
+    <div class="login-sub">Sign in with your admin password to manage keys.</div>
+    <div class="login-field">
+      <label class="field-label" for="loginInput">Admin password</label>
+      <input class="field-input" type="password" id="loginInput" placeholder="••••••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn-full" id="loginBtn" onclick="doLogin()">Continue</button>
+    <div class="login-error" id="loginError">Incorrect password — try again.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appShell">
+
+  <header class="topbar">
+    <div class="topbar-brand">Demo API</div>
+    <div class="topbar-right">
+      <div class="topbar-nav">
+        <button class="nav-tab active" id="tabKeys" onclick="switchTab('keys')">Keys</button>
+        <button class="nav-tab" id="tabDocs" onclick="switchTab('docs')">Endpoints</button>
+      </div>
+      <button class="btn-signout" onclick="doLogout()">Sign out</button>
+    </div>
+  </header>
+
+  <!-- KEYS TAB -->
+  <div class="page active" id="pageKeys">
+    <div class="content">
+
+      <!-- Create -->
+      <div class="section-heading">New key</div>
+
+      <div class="create-panel">
+        <div class="create-row">
+          <div>
+            <label class="field-label" for="newKeyName">Name</label>
+            <input class="field-input" type="text" id="newKeyName" placeholder="e.g. Local client, Zapier integration" />
+          </div>
+          <div>
+            <label class="field-label" for="newKeyPerms">Access</label>
+            <select class="field-input" id="newKeyPerms">
+              <option value="*">Full access</option>
+              <option value="read:users">Users only</option>
+              <option value="read:greetings">Greetings only</option>
+            </select>
+          </div>
+        </div>
+        <div class="create-actions">
+          <button class="btn-create" id="createBtn" onclick="createKey()">
+            Generate key
+          </button>
+        </div>
+      </div>
+
+      <!-- Reveal -->
+      <div class="key-reveal" id="keyReveal">
+        <div class="key-reveal-label">Key generated</div>
+        <div class="key-reveal-note">Copy it now — this is the only time it will be shown.</div>
+        <div class="key-box">
+          <div class="key-value" id="keyRevealValue"></div>
+          <button class="btn-copy" id="copyBtn" onclick="copyKey()">Copy</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Stats -->
+      <div class="section-heading">Overview</div>
+
+      <div class="stats-strip">
+        <div class="stat-cell">
+          <div class="stat-n" id="statTotal">—</div>
+          <div class="stat-desc">Total keys</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-n green" id="statActive">—</div>
+          <div class="stat-desc">Active</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-n" id="statUsed">—</div>
+          <div class="stat-desc">Used</div>
+        </div>
+      </div>
+
+      <!-- List -->
+      <div class="keys-wrap" id="keysWrap">
+        <div class="placeholder"><div class="placeholder-text">Loading…</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DOCS TAB -->
+  <div class="page" id="pageDocs">
+    <div class="content">
+      <div class="section-heading">Endpoints</div>
+      <div id="docsContent">
+        <div class="placeholder"><div class="placeholder-text">Loading…</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let adminPassword = '';
+
+/* ── AUTH ─────────────────────────────────────── */
+async function doLogin() {
+  const pw = document.getElementById('loginInput').value.trim();
+  if (!pw) return;
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+
+  try {
+    const res = await apiFetch('/admin/keys/stats', { adminPw: pw });
+    if (res.ok) {
+      adminPassword = pw;
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('appShell').style.display = 'block';
+      loadStats();
+      loadKeys();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  } catch {
+    document.getElementById('loginError').style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Continue';
+  }
+}
+
+document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  adminPassword = '';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginInput').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+/* ── NAV ──────────────────────────────────────── */
+function switchTab(tab) {
+  document.getElementById('pageKeys').classList.toggle('active', tab === 'keys');
+  document.getElementById('pageDocs').classList.toggle('active', tab === 'docs');
+  document.getElementById('tabKeys').classList.toggle('active', tab === 'keys');
+  document.getElementById('tabDocs').classList.toggle('active', tab === 'docs');
+  if (tab === 'docs') loadDocs();
+}
+
+/* ── FETCH HELPERS ────────────────────────────── */
+async function apiFetch(path, { method = 'GET', body, adminPw } = {}) {
+  const pw = adminPw || adminPassword;
+  const opts = {
+    method,
+    headers: { 'Authorization': `Admin ${pw}` }
+  };
+  if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  return fetch(path, opts);
+}
+
+/* ── STATS ────────────────────────────────────── */
+async function loadStats() {
+  try {
+    const res = await apiFetch('/admin/keys/stats');
+    if (!res.ok) return;
+    const d = await res.json();
+    document.getElementById('statTotal').textContent = d.total ?? '—';
+    document.getElementById('statActive').textContent = d.active ?? '—';
+    document.getElementById('statUsed').textContent = d.used_at_least_once ?? '—';
+  } catch {}
+}
+
+/* ── KEYS LIST ────────────────────────────────── */
+async function loadKeys() {
+  const wrap = document.getElementById('keysWrap');
+  wrap.innerHTML = `<div class="placeholder"><div class="placeholder-text">Loading…</div></div>`;
+  try {
+    const res = await apiFetch('/admin/keys');
+    const data = await res.json();
+    if (!data.keys || data.keys.length === 0) {
+      wrap.innerHTML = `<div class="placeholder"><div class="placeholder-text">No keys yet — generate one above.</div></div>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <table class="keys-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Access</th>
+            <th>Status</th>
+            <th>Last used</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.keys.map(k => `
+            <tr>
+              <td class="key-name-cell">
+                <div class="name">${esc(k.name)}</div>
+                <div class="prefix">${esc(k.key_prefix || '')}••••</div>
+              </td>
+              <td>${renderPerms(k.permissions)}</td>
+              <td>
+                <span class="${k.revoked ? 'status-revoked' : 'status-active'}">
+                  <span class="status-dot"></span>
+                  ${k.revoked ? 'Revoked' : 'Active'}
+                </span>
+              </td>
+              <td class="meta">${k.lastUsed ? timeAgo(k.lastUsed) : 'Never'}</td>
+              <td>
+                ${!k.revoked
+                  ? `<button class="btn-revoke" id="revoke-${k.id}" onclick="revokeKey(${k.id})">Revoke</button>`
+                  : ''}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+  } catch (e) {
+    wrap.innerHTML = `<div class="placeholder"><div class="placeholder-text" style="color:var(--danger)">Failed to load keys.</div></div>`;
+  }
+}
+
+function renderPerms(perms) {
+  return perms.map(p =>
+    `<span class="perm-tag ${p === '*' ? 'all' : ''}">${esc(p)}</span>`
+  ).join(' ');
+}
+
+/* ── CREATE KEY ───────────────────────────────── */
+async function createKey() {
+  const name = document.getElementById('newKeyName').value.trim();
+  const perm = document.getElementById('newKeyPerms').value;
+  if (!name) { document.getElementById('newKeyName').focus(); return; }
+
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  document.getElementById('keyReveal').style.display = 'none';
+
+  try {
+    const res = await apiFetch('/admin/keys', { method: 'POST', body: { name, permissions: [perm] } });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || 'Failed to create key'); return; }
+
+    document.getElementById('keyRevealValue').textContent = data.key;
+    document.getElementById('keyReveal').style.display = 'block';
+    document.getElementById('keyReveal').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('newKeyName').value = '';
+    document.getElementById('newKeyPerms').selectedIndex = 0;
+    await loadKeys();
+    await loadStats();
+  } catch (e) {
+    alert('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generate key';
+  }
+}
+
+/* ── REVOKE ───────────────────────────────────── */
+async function revokeKey(id) {
+  if (!confirm('Revoke this key? Apps using it will lose access immediately.')) return;
+  const btn = document.getElementById(`revoke-${id}`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Revoking…'; }
+  try {
+    const res = await apiFetch(`/admin/keys/${id}`, { method: 'DELETE' });
+    if (!res.ok) { const d = await res.json(); alert(d.error || 'Failed'); return; }
+    await loadKeys();
+    await loadStats();
+  } catch (e) {
+    alert('Error: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Revoke'; }
+  }
+}
+
+/* ── COPY ─────────────────────────────────────── */
+function copyKey() {
+  const key = document.getElementById('keyRevealValue').textContent;
+  navigator.clipboard.writeText(key).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+/* ── DOCS ─────────────────────────────────────── */
+async function loadDocs() {
+  const wrap = document.getElementById('docsContent');
+  if (wrap.dataset.loaded) return;
+  try {
+    const res = await fetch('/api/docs');
+    const d = await res.json();
+    const base = window.location.origin;
+    wrap.innerHTML = `
+      <div class="doc-block">
+        <div class="doc-block-head">Authentication</div>
+        <div class="doc-block-body">
+          <div class="code-block">Authorization: Bearer YOUR_API_KEY</div>
+        </div>
+      </div>
+      <div class="doc-block">
+        <div class="doc-block-head">Data endpoints</div>
+        <div class="doc-block-body">
+          ${d.endpoints.map(e => `
+            <div class="endpoint-row">
+              <span class="method-badge">GET</span>
+              <span class="ep-path">${esc(e.path)}</span>
+              <span class="ep-perm">${esc(e.auth)}</span>
+              <span class="ep-desc">${esc(e.description)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="doc-block">
+        <div class="doc-block-head">Example</div>
+        <div class="doc-block-body">
+          <div class="code-block">curl -H "Authorization: Bearer YOUR_KEY" \\
+     ${base}/api/users</div>
+        </div>
+      </div>`;
+    wrap.dataset.loaded = '1';
+  } catch {
+    wrap.innerHTML = `<div class="placeholder"><div class="placeholder-text" style="color:var(--danger)">Could not load docs.</div></div>`;
+  }
+}
+
+/* ── UTILS ────────────────────────────────────── */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - new Date(ts).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'Just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
+</script>
+</body>
+</html>
