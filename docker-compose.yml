@@ -29,7 +29,7 @@ services:
       demo-api-mysql:
         condition: service_healthy
     environment:
-      PORT: 4000
+      PORT: 37121
       DB_HOST: demo-api-mysql
       DB_PORT: 3306
       DB_USER: ${DB_USER:-demo_user}
@@ -37,7 +37,7 @@ services:
       DB_NAME: ${DB_NAME:-demo_api_db}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     ports:
-      - "4000:4000"
+      - "37121:37121"
     networks:
       - demo-api-network
     deploy:
