@@ -4,14 +4,14 @@
 
 const express = require('express');
 const router = express.Router();
-const { generateApiKey, hashKey } = require('../helpers/apiKeys');
+const { generateApiKey, hashKey, parsePermissions } = require('../helpers/apiKeys');
 
 // GET /admin/keys - list all API keys (without revealing the actual key)
 router.get('/keys', async (req, res) => {
   try {
     const pool = req.app.get('dbPool');
     const [rows] = await pool.execute(`
-      SELECT id, name, permissions, revoked, last_used_at, created_at, expires_at
+      SELECT id, name, key_prefix, permissions, revoked, last_used_at, created_at, expires_at
       FROM api_keys
       ORDER BY created_at DESC
     `);
@@ -19,7 +19,8 @@ router.get('/keys', async (req, res) => {
     const keys = rows.map(k => ({
       id: k.id,
       name: k.name,
-      permissions: JSON.parse(k.permissions || '[]'),
+      key_prefix: k.key_prefix,
+      permissions: parsePermissions(k.permissions),
       revoked: !!k.revoked,
       lastUsed: k.last_used_at,
       createdAt: k.created_at,

@@ -607,7 +607,7 @@
         <div class="key-reveal-note">Copy it now — this is the only time it will be shown.</div>
         <div class="key-box">
           <div class="key-value" id="keyRevealValue"></div>
-          <button class="btn-copy" id="copyBtn" onclick="copyKey()">Copy</button>
+          <button type="button" class="btn-copy" id="copyBtn" onclick="copyKey()">Copy</button>
         </div>
       </div>
 
@@ -734,6 +734,10 @@ async function loadKeys() {
   try {
     const res = await apiFetch('/admin/keys');
     const data = await res.json();
+    if (!res.ok) {
+      wrap.innerHTML = `<div class="placeholder"><div class="placeholder-text" style="color:var(--danger)">${esc(data.error || 'Failed to load keys.')}</div></div>`;
+      return;
+    }
     if (!data.keys || data.keys.length === 0) {
       wrap.innerHTML = `<div class="placeholder"><div class="placeholder-text">No keys yet — generate one above.</div></div>`;
       return;
@@ -832,13 +836,45 @@ async function revokeKey(id) {
 }
 
 /* ── COPY ─────────────────────────────────────── */
-function copyKey() {
-  const key = document.getElementById('keyRevealValue').textContent;
-  navigator.clipboard.writeText(key).then(() => {
-    const btn = document.getElementById('copyBtn');
+async function copyKey() {
+  const key = document.getElementById('keyRevealValue').textContent.trim();
+  const btn = document.getElementById('copyBtn');
+  if (!key) return;
+
+  const showCopied = () => {
     btn.textContent = 'Copied';
-    setTimeout(() => btn.textContent = 'Copy', 2000);
-  });
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  };
+
+  const showFailed = () => {
+    btn.textContent = 'Failed';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  };
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(key);
+      showCopied();
+      return;
+    }
+  } catch {}
+
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = key;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, key.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    if (ok) showCopied();
+    else showFailed();
+  } catch {
+    showFailed();
+  }
 }
 
 /* ── DOCS ─────────────────────────────────────── */

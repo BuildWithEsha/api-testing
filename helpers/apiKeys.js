@@ -48,4 +48,19 @@ async function findApiKey(pool, rawKey) {
   return record;
 }
 
-module.exports = { generateApiKey, hashKey, findApiKey };
+/**
+ * Parse permissions from DB — mysql2 may return JSON columns already parsed.
+ */
+function parsePermissions(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value || '[]');
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+module.exports = { generateApiKey, hashKey, findApiKey, parsePermissions };

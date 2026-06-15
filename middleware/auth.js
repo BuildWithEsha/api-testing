@@ -1,7 +1,7 @@
 // middleware/auth.js
 // DB-backed API key auth with per-key permission checking
 
-const { findApiKey } = require('../helpers/apiKeys');
+const { findApiKey, parsePermissions } = require('../helpers/apiKeys');
 
 /**
  * requirePermission(permission)
@@ -34,13 +34,7 @@ function requirePermission(permission) {
         return res.status(403).json({ error: 'Invalid or revoked API key' });
       }
 
-      // Parse permissions JSON
-      let permissions = [];
-      try {
-        permissions = JSON.parse(keyRecord.permissions || '[]');
-      } catch {
-        permissions = [];
-      }
+      const permissions = parsePermissions(keyRecord.permissions);
 
       const hasPermission =
         permissions.includes('*') || permissions.includes(permission);
